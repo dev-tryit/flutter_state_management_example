@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:provider/provider.dart';
 
+import 'ProfileController.dart';
+
 void main() {
-  runApp(MultiProvider(
-    providers: [
-      ProfileProvider.provider,
-    ],
-    child: const MyApp(),
-  ));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -15,42 +15,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return const GetMaterialApp(
       home: ProfilePage(),
     );
-  }
-}
-
-class Profile {
-  String? id;
-  String? email;
-}
-
-typedef ConsumerBuilderType<T> = Widget Function(
-    BuildContext context, T provider, Widget? child);
-
-class ProfileProvider extends ChangeNotifier {
-  final profile = Profile();
-
-  BuildContext context;
-
-  ProfileProvider(this.context);
-
-  static ChangeNotifierProvider get provider =>
-      ChangeNotifierProvider<ProfileProvider>(
-          create: (context) => ProfileProvider(context));
-
-  static Widget consumer(
-          {required ConsumerBuilderType<ProfileProvider> builder}) =>
-      Consumer<ProfileProvider>(builder: builder);
-
-  static ProfileProvider read(BuildContext context) =>
-      context.read<ProfileProvider>();
-
-  void setProfile(Profile profile) {
-    profile.id = profile.id;
-    profile.email = profile.email;
-    notifyListeners();
   }
 }
 
@@ -59,9 +26,11 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ProfileProvider.consumer(
-      builder: (BuildContext context, ProfileProvider provider, Widget? child) {
-        print("ProfileProvider rebuild : profile:${provider.profile}");
+    var controller = ProfileController.instsance();
+
+    return ProfileController.consumer(
+      builder: (_) {
+        print("ProfileController.consumer rebuild : ${controller.profile}");
         return Scaffold(
           body: SizedBox.expand(
             child: Column(
@@ -69,8 +38,8 @@ class ProfilePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.person, size: 200),
-                Text("id : ${provider.profile.id ?? ''}"),
-                Text("email : ${provider.profile.email ?? ''}"),
+                Text("id : ${controller.profile.id ?? ''}"),
+                Text("email : ${controller.profile.email ?? ''}"),
                 ElevatedButton(
                   child: const Text("프로필 변경하기"),
                   onPressed: () {
@@ -94,7 +63,7 @@ class ProfilePage extends StatelessWidget {
 class ChangeProfileBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var provider = ProfileProvider.read(context);
+    var provider = ProfileController.instsance();
 
     return Column(
         mainAxisSize: MainAxisSize.min,
